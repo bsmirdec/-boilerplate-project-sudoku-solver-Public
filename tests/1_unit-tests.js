@@ -55,7 +55,7 @@ suite("Unit Tests", () => {
 
   suite("solver logic tests", () => {
     test("valid puzzle strings pass the solver", () => {});
-    test("invalid puzzle strings fail the solver", () => {
+    test("returns the expected solution for an incomplete puzzle", () => {
       assert.deepEqual(solver.solve(shortString), {
         error: "Expected puzzle to be 81 characters long",
       });

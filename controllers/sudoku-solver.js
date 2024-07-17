@@ -11,6 +11,17 @@ class SudokuSolver {
       H: 7,
       I: 8,
     };
+    this.numToLetter = {
+      0: "A",
+      1: "B",
+      2: "C",
+      3: "D",
+      4: "E",
+      5: "F",
+      6: "G",
+      7: "H",
+      8: "I",
+    };
   }
 
   validate(puzzleString) {
@@ -24,6 +35,19 @@ class SudokuSolver {
       }
     }
     return true;
+  }
+
+  getCellIndex(row, column) {
+    const rowNum = this.lettersToNum[row];
+    const index = rowNum * 9 + column - 1;
+    return index;
+  }
+
+  getCellCoordinate(index) {
+    const rowNum = Math.floor(index / 9);
+    const row = this.numToLetter[rowNum];
+    const column = (index % 9) + 1;
+    return { row: row, column: column };
   }
 
   checkRowPlacement(puzzleString, row, column, value) {
@@ -75,6 +99,26 @@ class SudokuSolver {
       return false;
     }
     return true;
+  }
+
+  checkPlacement(puzzleString, row, column, value) {
+    const conflicts = [];
+    if (!this.checkRowPlacement(puzzleString, row, column, value)) {
+      conflicts.push("row");
+    }
+    if (!this.checkColPlacement(puzzleString, row, column, value)) {
+      conflicts.push("column");
+    }
+    if (!this.checkRegionPlacement(puzzleString, row, column, value)) {
+      conflicts.push("region");
+    }
+    if (conflicts.length === 0) {
+      return { valid: true };
+    } else if (conflicts.length === 1) {
+      return { valid: false, conflict: conflicts[0] };
+    } else {
+      return { valid: false, conflict: conflicts };
+    }
   }
 
   solve(puzzleString) {
