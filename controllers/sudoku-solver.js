@@ -50,6 +50,20 @@ class SudokuSolver {
     return { row: row, column: column };
   }
 
+  getCellRegionValues(puzzleValues, row, column) {
+    const rowNum = this.lettersToNum[row];
+    const regionRow = Math.floor(rowNum / 3) * 3;
+    const regionCol = Math.floor((column - 1) / 3) * 3;
+    const regionValues = [];
+
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        regionValues.push(puzzleValues[(regionRow + i) * 9 + regionCol + j]);
+      }
+    }
+    return regionValues;
+  }
+
   checkRowPlacement(puzzleString, row, column, value) {
     const puzzleValues = puzzleString.split("");
     const rowNum = this.lettersToNum[row];
@@ -82,15 +96,7 @@ class SudokuSolver {
   checkRegionPlacement(puzzleString, row, column, value) {
     const puzzleValues = puzzleString.split("");
     const rowNum = this.lettersToNum[row];
-    const regionRow = Math.floor(rowNum / 3) * 3;
-    const regionCol = Math.floor((column - 1) / 3) * 3;
-    const regionValues = [];
-
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        regionValues.push(puzzleValues[(regionRow + i) * 9 + regionCol + j]);
-      }
-    }
+    const regionValues = this.getCellRegionValues(puzzleValues, row, column);
 
     if (regionValues.includes(value.toString())) {
       return false;
@@ -122,9 +128,62 @@ class SudokuSolver {
   }
 
   solve(puzzleString) {
-    if (this.validate(puzzleString) !== true) {
-      return this.validate(puzzleString);
+    const validationError = this.validate(puzzleString);
+    if (validationError !== true) {
+      return false;
     }
+    const puzzleValues = puzzleString.split("");
+    // get first "."
+    for (let i = 0; i < puzzleValues.length; i++) {
+      if (puzzleValues[i] === ".") {
+        const currentIndex = i;
+        const { row, column } = this.getCellCoordinate(currentIndex);
+
+        // get the current region values
+        const regionValues = this.getCellRegionValues(
+          puzzleValues,
+          row,
+          column
+        );
+
+        // get the region missing values
+        const missingValues = [];
+        for (let j = 1; j < 10; j++) {
+          const numString = j.toString();
+
+          if (regionValues.indexOf(numString) === -1) {
+            missingValues.push(numString);
+          }
+        }
+
+        // set a while loop to try each of the missing values
+        let count = 0;
+        while (count < missingValues.length) {
+          // check for the value
+          const valueToTry = missingValues[count];
+          const placement = this.checkPlacement(
+            puzzleString,
+            row,
+            column,
+            valueToTry
+          );
+
+          // if value fits, replace the current "." with value to try
+          if (placement.valid) {
+            puzzleValues[currentIndex] = missingValues[count];
+            const newPuzzleString = puzzleValues.join("");
+            const solvedPuzzle = this.solve(newPuzzleString);
+            if (solvedPuzzle) {
+              return solvedPuzzle;
+            }
+            puzzleValues[currentIndex] = ".";
+          }
+          count += 1;
+        }
+        return false;
+      }
+    }
+    return puzzleString;
   }
 }
 

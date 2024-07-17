@@ -7,6 +7,8 @@ let solver = new SudokuSolver();
 suite("Unit Tests", () => {
   const validString =
     "1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.";
+  const validSolution =
+    "135762984946381257728459613694517832812936745357824196473298561581673429269145378";
   const invalidString =
     "1.5..2.84..63.12.7.2..5...?.9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.";
   const shortString = "13431...124...";
@@ -54,14 +56,18 @@ suite("Unit Tests", () => {
   });
 
   suite("solver logic tests", () => {
-    test("valid puzzle strings pass the solver", () => {});
+    test("valid puzzle strings pass the solver", () => {
+      assert.equal(solver.solve(validString), validSolution);
+    });
+    test("invalid puzzle strings fail the solver", () => {
+      assert.isFalse(solver.solve(invalidString));
+    });
     test("returns the expected solution for an incomplete puzzle", () => {
-      assert.deepEqual(solver.solve(shortString), {
-        error: "Expected puzzle to be 81 characters long",
-      });
-      assert.deepEqual(solver.solve(invalidString), {
-        error: "Invalid characters in puzzle",
-      });
+      assert.isFalse(
+        solver.solve(
+          "1.5..2.84..63.12.7.2..5....999.1....8.2.3674.3.7.2..9.47...8..1..16....926914.37."
+        )
+      );
     });
   });
 });

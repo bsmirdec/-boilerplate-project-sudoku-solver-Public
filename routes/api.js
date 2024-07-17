@@ -41,5 +41,26 @@ module.exports = function (app) {
     }
   });
 
-  app.route("/api/solve").post((req, res) => {});
+  app.route("/api/solve").post((req, res) => {
+    const puzzle = req.body.puzzle;
+
+    // check for puzzle
+    if (!puzzle) {
+      return res.json({ error: "Required field missing" });
+    }
+
+    // puzzle string validation
+    const validationError = solver.validate(puzzle);
+    if (validationError !== true) {
+      return res.json(validationError);
+    }
+
+    // solve puzzle
+    const solution = solver.solve(puzzle);
+    if (solution) {
+      return res.json({ solution: solution });
+    }
+
+    return res.json({ error: "Puzzle cannot be solved" });
+  });
 };
